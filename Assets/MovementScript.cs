@@ -13,6 +13,11 @@ public class MovementScript : MonoBehaviour
     public float maxspeed;
     public float jumpforce;
     public int keycount;
+    public AudioClip NoContest;
+    public AudioClip start;
+    public AudioClip Game;
+    public AudioClip Failures;
+    AudioSource audiosource;
     
     //Success & Failure PNGS. Not sure if Failure shows with current method of defeat.
     public  GameObject Success;
@@ -35,11 +40,12 @@ public class MovementScript : MonoBehaviour
         RigidPlayer = GetComponent<Rigidbody2D>();
         keycount = 0;
         currentTime = startingTime;
+        audiosource = GetComponent<AudioSource>();
         
         //Announce Both png states to be false at start.
         Success.SetActive(false);
         Failure.SetActive(false);
-
+        audiosource.PlayOneShot(start, 0.7f);
     }
 
     // Update is called once per frame
@@ -79,7 +85,9 @@ public class MovementScript : MonoBehaviour
         if (currentTime <= 0)
         {
             currentTime = 0;
+            audiosource.PlayOneShot(NoContest, 0.7f);
             Failure.SetActive(true);
+
         }
         if (win == true)
         {
@@ -88,6 +96,7 @@ public class MovementScript : MonoBehaviour
         if (death== true)
         {
             Time.timeScale = 0;
+            
         }
 
     }
@@ -102,6 +111,7 @@ public class MovementScript : MonoBehaviour
         }
         if (collision.gameObject.CompareTag("Spike"))
         {
+            audiosource.PlayOneShot(Failures, 0.7f);
             Failure.SetActive(true);
             death = true;
             
