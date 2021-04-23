@@ -22,6 +22,7 @@ public class MovementScript : MonoBehaviour
     //Success & Failure PNGS. Not sure if Failure shows with current method of defeat.
     public  GameObject Success;
     public GameObject Failure;
+    public GameObject Quit;
 
     //Timer and Win & Death State RIP announcer sound files added but couldnt' be used in time.. would've added nice flair I wanted in it badly.
     float currentTime;
@@ -46,6 +47,7 @@ public class MovementScript : MonoBehaviour
         Success.SetActive(false);
         Failure.SetActive(false);
         audiosource.PlayOneShot(start, 0.7f);
+        Quit.SetActive(false);
     }
 
     // Update is called once per frame
@@ -87,6 +89,7 @@ public class MovementScript : MonoBehaviour
             currentTime = 0;
             audiosource.PlayOneShot(NoContest, 0.7f);
             Failure.SetActive(true);
+            Quit.SetActive(true);
 
         }
         if (win == true)
@@ -113,6 +116,7 @@ public class MovementScript : MonoBehaviour
         {
             audiosource.PlayOneShot(Failures, 0.7f);
             Failure.SetActive(true);
+            Quit.SetActive(true);
             death = true;
             
             
@@ -165,8 +169,14 @@ public class MovementScript : MonoBehaviour
         if (collision.gameObject.CompareTag("Winner"))
         {
             
-            Success.SetActive(true);
+            Success.SetActive(true); 
+            Quit.SetActive(true);
             win = true;
         }
+    }
+
+  public void QuitGame()
+    {
+        Application.Quit();
     }
 }
