@@ -46,16 +46,6 @@ public class MovementScript : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal");
        
 
-        //if (RigidPlayer.velocity.x > 0)
-        //{
-        //    jumpdirection = 1;
-        //    print(jumpdirection);
-        //}
-        //if (RigidPlayer.velocity.x < 0)
-        //{
-        //    jumpdirection = -1;
-        //    print(jumpdirection);
-        //}
         if (Input.GetButtonDown("Jump") && jump == true)
         {
             RigidPlayer.velocity = Vector2.up * jumpforce;
@@ -94,20 +84,7 @@ public class MovementScript : MonoBehaviour
 
     }
 
-        
-
-            //if (RigidPlayer.velocity.y > 0){
-            //    RigidPlayer.AddForce(jumpdirection,ForceMode2D impulse)
-            // }
-
-
-
-
-
-        
-
-
-    private void FixedUpdate()
+     private void FixedUpdate()
     {
       
 
