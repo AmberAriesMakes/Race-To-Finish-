@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class MovementScript : MonoBehaviour
 {
-
+    //Public Variables
     public Rigidbody2D RigidPlayer;
     public int Force;
     public bool jump;
@@ -14,9 +14,11 @@ public class MovementScript : MonoBehaviour
     public float jumpforce;
     public int keycount;
     
+    //Success & Failure PNGS. Not sure if Failure shows with current method of defeat.
     public  GameObject Success;
     public GameObject Failure;
 
+    //Timer and Win & Death State RIP announcer sound files added but couldnt' be used in time.. would've added nice flair I wanted in it badly.
     float currentTime;
     float startingTime = 200;
     bool win;
@@ -34,7 +36,7 @@ public class MovementScript : MonoBehaviour
         keycount = 0;
         currentTime = startingTime;
         
-
+        //Announce Both png states to be false at start.
         Success.SetActive(false);
         Failure.SetActive(false);
 
@@ -43,14 +45,18 @@ public class MovementScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        // I wasn't sure what you meant last time as "No calculations" But I tried harder this time to fit your critera. This is as much calculation as I could think of. 
         float x = Input.GetAxisRaw("Horizontal");
        
-
+        //Jumping Done by Vector 2's upward force ontop of the public jump force variable. 
         if (Input.GetButtonDown("Jump") && jump == true)
         {
             RigidPlayer.velocity = Vector2.up * jumpforce;
           
         }
+
+        //This method works with movement to allow diagonal jump movement.
         if(Input.GetKey(KeyCode.RightArrow))
         {
             RigidPlayer.velocity = new Vector2(Force, RigidPlayer.velocity.y);
@@ -68,10 +74,12 @@ public class MovementScript : MonoBehaviour
         Countdowntext.text = currentTime.ToString("0:00");
         Keys.text = keycount.ToString();
 
+
+        //If you run out of time, you fail! 
         if (currentTime <= 0)
         {
             currentTime = 0;
-            Failure.SetActive(false);
+            Failure.SetActive(true);
         }
         if (win == true)
         {
@@ -84,18 +92,12 @@ public class MovementScript : MonoBehaviour
 
     }
 
-     private void FixedUpdate()
-    {
-      
-
-    }
-    
-
+    //COLLISION CHECKS FOR EVERYTHING THAT NEEDS IT.
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            jump = true;
+            jump = true;        //jUMP CHECK TO ENSURE NO DOUBLE JUMPING
             
         }
         if (collision.gameObject.CompareTag("Spike"))
@@ -123,11 +125,11 @@ public class MovementScript : MonoBehaviour
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Slow"))
+        if (collision.gameObject.CompareTag("Slow"))    //Trigger platforms change the movement speed of the player to be slow...
         {
             Force = 3;
         }
-        if (collision.gameObject.CompareTag("Speed"))
+        if (collision.gameObject.CompareTag("Speed")) //Or fast..
         {
             Force = 8;
         }
@@ -136,6 +138,8 @@ public class MovementScript : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+
+        //This restores the force to its original speed when out of the benefit/debuff
         if (collision.gameObject.CompareTag("Slow"))
         {
             Force = 5;
@@ -145,7 +149,7 @@ public class MovementScript : MonoBehaviour
                 Force = 5;
             }
         }
-
+    //Finally the trigger for victory.
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Winner"))

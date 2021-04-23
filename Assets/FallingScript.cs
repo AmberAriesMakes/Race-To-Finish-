@@ -15,6 +15,7 @@ public class FallingScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Fiddling with the gravity and velocity to ensure better landing after jumping.
         if (fallRb.velocity.y < 0)
         {
            fallRb.velocity += Vector2.up * Physics2D.gravity * (gravitymultiplier - 1) * Time.deltaTime;
