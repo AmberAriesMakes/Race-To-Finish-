@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Animations;
+using UnityEngine.SceneManagement;
 
 public class MovementScript : MonoBehaviour
 {
@@ -17,16 +19,25 @@ public class MovementScript : MonoBehaviour
     public AudioClip start;
     public AudioClip Game;
     public AudioClip Failures;
+    public AudioClip winner;
+    bool forwardfacing = true;
+    SpriteRenderer flipper;
     AudioSource audiosource;
+    Animator anim;
     
     //Success & Failure PNGS. Not sure if Failure shows with current method of defeat.
     public  GameObject Success;
     public GameObject Failure;
-    public GameObject Quit;
+    public GameObject QuitButton;
+    public GameObject RestartButton;
+    public GameObject countdown;
+    public GameObject keyss;
+  
 
     //Timer and Win & Death State RIP announcer sound files added but couldnt' be used in time.. would've added nice flair I wanted in it badly.
     float currentTime;
-    float startingTime = 200;
+    float startingTime = 120;
+    
     bool win;
     bool death;
 
@@ -41,37 +52,60 @@ public class MovementScript : MonoBehaviour
         RigidPlayer = GetComponent<Rigidbody2D>();
         keycount = 0;
         currentTime = startingTime;
-        audiosource = GetComponent<AudioSource>();
         
+        audiosource = GetComponent<AudioSource>();
+        flipper = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         //Announce Both png states to be false at start.
         Success.SetActive(false);
         Failure.SetActive(false);
         audiosource.PlayOneShot(start, 0.7f);
-        Quit.SetActive(false);
+        QuitButton.SetActive(false);
+        RestartButton.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        // I wasn't sure what you meant last time as "No calculations" But I tried harder this time to fit your critera. This is as much calculation as I could think of. 
+       
         float x = Input.GetAxisRaw("Horizontal");
        
         //Jumping Done by Vector 2's upward force ontop of the public jump force variable. 
         if (Input.GetButtonDown("Jump") && jump == true)
         {
             RigidPlayer.velocity = Vector2.up * jumpforce;
-          
+            anim.SetBool("JumpF", true);
+
         }
 
         //This method works with movement to allow diagonal jump movement.
         if(Input.GetKey(KeyCode.RightArrow))
         {
             RigidPlayer.velocity = new Vector2(Force, RigidPlayer.velocity.y);
+            anim.SetBool("IsMoving", true);
         }
-        if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow))
         {
             RigidPlayer.velocity = new Vector2(-Force, RigidPlayer.velocity.y);
+            anim.SetBool("IsMoving", true);
+        }
+        else
+        {
+            anim.SetBool("IsMoving", false);
+        }
+
+        if((Input.GetKey(KeyCode.RightArrow))&& !forwardfacing == true)
+        {
+            flip();
+            
+            flipper.flipX = false;
+        }
+        if ((Input.GetKey(KeyCode.LeftArrow)) && forwardfacing == true)
+        {
+            flip();
+
+            flipper.flipX = true;
         }
 
         if (RigidPlayer.velocity.magnitude > maxspeed)
@@ -79,7 +113,9 @@ public class MovementScript : MonoBehaviour
             RigidPlayer.velocity = RigidPlayer.velocity.normalized * maxspeed;
         }
         currentTime -= 1 * Time.deltaTime;
-        Countdowntext.text = currentTime.ToString("0:00");
+        float minutes = Mathf.FloorToInt(currentTime / 60);
+        float seconds = Mathf.FloorToInt(currentTime % 60);
+        Countdowntext.text = string.Format("{0:00}:{1:00}", minutes, seconds);
         Keys.text = keycount.ToString();
 
 
@@ -89,7 +125,8 @@ public class MovementScript : MonoBehaviour
             currentTime = 0;
             audiosource.PlayOneShot(NoContest, 0.7f);
             Failure.SetActive(true);
-            Quit.SetActive(true);
+            QuitButton.SetActive(true);
+            RestartButton.SetActive(true);
 
         }
         if (win == true)
@@ -101,6 +138,10 @@ public class MovementScript : MonoBehaviour
             Time.timeScale = 0;
             
         }
+        else
+        {
+            Time.timeScale = 1;
+        }
 
     }
 
@@ -110,14 +151,19 @@ public class MovementScript : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             jump = true;        //jUMP CHECK TO ENSURE NO DOUBLE JUMPING
-            
+            anim.SetBool("IsGrounded", true);
+            anim.SetBool("JumpF", false);
         }
         if (collision.gameObject.CompareTag("Spike"))
         {
             audiosource.PlayOneShot(Failures, 0.7f);
             Failure.SetActive(true);
-            Quit.SetActive(true);
+            QuitButton.SetActive(true);
+            RestartButton.SetActive(true);
+            keyss.SetActive(false);
+            countdown.SetActive(false);
             death = true;
+
             
             
         }
@@ -128,12 +174,20 @@ public class MovementScript : MonoBehaviour
         }
 
     }
+    private void flip()
+    {
+        forwardfacing = !forwardfacing;
+        //transform.Rotate(0f, 180f, 0f);
+       
+        
+    }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             jump = false;
+            
         }
        
     }
@@ -145,7 +199,7 @@ public class MovementScript : MonoBehaviour
         }
         if (collision.gameObject.CompareTag("Speed")) //Or fast..
         {
-            Force = 8;
+            Force++;
         }
 
     }
@@ -156,11 +210,11 @@ public class MovementScript : MonoBehaviour
         //This restores the force to its original speed when out of the benefit/debuff
         if (collision.gameObject.CompareTag("Slow"))
         {
-            Force = 5;
+            Force = 8;
         }
             if (collision.gameObject.CompareTag("Speed"))
             {
-                Force = 5;
+                Force = 8;
             }
         }
     //Finally the trigger for victory.
@@ -170,8 +224,12 @@ public class MovementScript : MonoBehaviour
         {
             
             Success.SetActive(true); 
-            Quit.SetActive(true);
+            QuitButton.SetActive(true);
+            RestartButton.SetActive(true);
             win = true;
+            keyss.SetActive(false);
+            countdown.SetActive(false);
+            audiosource.PlayOneShot(winner, 0.7f);
         }
     }
 
@@ -179,4 +237,11 @@ public class MovementScript : MonoBehaviour
     {
         Application.Quit();
     }
+
+    public void Restart()
+    {
+        death = false;
+        SceneManager.LoadScene(0);
+    }
+   
 }
